@@ -18,6 +18,7 @@
     <div class="toolbar">
       <button id="btn-export" class="btn btn-ghost btn-sm" type="button">导出 JSON</button>
       <button id="btn-import" class="btn btn-ghost btn-sm" type="button">导入 JSON</button>
+      <button id="btn-sync" class="btn btn-ghost btn-sm" type="button">同步设置</button>
       <button id="btn-reset" class="btn btn-danger-ghost btn-sm" type="button">重置</button>
     </div>
   </header>
@@ -41,6 +42,38 @@
           <input id="init-salary" type="number" value="8000" step="1" required />
         </label>
         <button class="btn btn-primary btn-block" type="submit">开始记账</button>
+      </form>
+    </section>
+
+    <!-- GitHub 同步设置面板（默认隐藏） -->
+    <section id="sync-panel" class="card hidden">
+      <h3>GitHub 数据同步</h3>
+      <p class="hint">
+        数据将保存为仓库中的 <code>data/state.json</code>：打开页面自动拉取最新数据，
+        每次记账后自动提交更新。需要填写你的
+        <strong>fine-grained Personal Access Token</strong>（只授权本仓库的 Contents 读写权限）。
+        Token 仅保存在本机浏览器中。
+      </p>
+      <form id="sync-form" autocomplete="off">
+        <div class="field-row">
+          <label class="field"><span>用户名</span><input id="sync-owner" type="text" placeholder="picfik" /></label>
+          <label class="field"><span>仓库名</span><input id="sync-repo" type="text" placeholder="cashflow-pwa" /></label>
+        </div>
+        <div class="field-row">
+          <label class="field"><span>分支</span><input id="sync-branch" type="text" value="main" /></label>
+          <label class="field"><span>文件路径</span><input id="sync-path" type="text" value="data/state.json" /></label>
+        </div>
+        <label class="field">
+          <span>Access Token（fine-grained，Contents 读写）</span>
+          <input id="sync-token" type="password" placeholder="github_pat_..." />
+        </label>
+        <div class="form-row">
+          <button class="btn btn-primary" type="submit">保存并启用同步</button>
+          <button class="btn btn-ghost" type="button" id="sync-push">立即推送</button>
+          <button class="btn btn-ghost" type="button" id="sync-pull">立即拉取</button>
+          <button class="btn btn-danger-ghost" type="button" id="sync-clear">停用同步</button>
+        </div>
+        <p id="sync-status" class="hint"></p>
       </form>
     </section>
 
@@ -125,6 +158,7 @@
 
   <script src="./js/engine.js"></script>
   <script src="./js/storage.js"></script>
+  <script src="./js/sync.js"></script>
   <script src="./js/ui.js"></script>
   <script src="./js/app.js"></script>
 </body>

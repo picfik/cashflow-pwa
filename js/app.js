@@ -12,12 +12,13 @@
   // 当前账本数据（全局唯一状态）
   var state = null;
 
-  /** 刷新：更新时间戳 → 追加日志 → 自动保存 → 重新渲染 */
+  /** 刷新：更新时间戳 → 追加日志 → 自动保存 → 重新渲染 → 计划推送 */
   function commit(logText) {
     state.updatedAt = new Date().toISOString();
     if (logText) state.log = window.AppStorage.pushLog(state, logText);
     window.AppStorage.saveState(state);
     window.UI.render(state, window.Engine.summary(state));
+    schedulePush();
   }
 
   /** 切换面板：显示主面板并隐藏初始化面板（或反之） */
@@ -35,17 +36,47 @@
     }
   }
 
-  /** 页面加载：优先从 localStorage 恢复，否则显示初始化面板 */
+  /** 页面加载：本地先显示，再拉取 GitHub 远端数据，谁新用谁 */
   function init() {
     state = window.AppStorage.loadState();
+    showPanel();
+    bindEvents();
+    registerServiceWorker();
+
+    if (!window.GitHubSync.isConfigured()) return;
+    setSyncStatus('正在从 GitHub 拉取数据…');
+    window.GitHubSync.pullState().then(function (remote) {
+      if (!remote) {
+        setSyncStatus('GitHub 上还没有数据文件，记账后将自动创建');
+        schedulePush();
+        return;
+      }
+      var remoteAt = remote.state.updatedAt || '';
+      var localAt = (state && state.updatedAt) || '';
+      if (remoteAt > localAt) {
+        // 远端更新：覆盖本地
+        state = remote.state;
+        window.AppStorage.saveState(state);
+        setSyncStatus('已从 GitHub 恢复最新数据');
+      } else {
+        // 本地不落后：稍后把本地数据推上去
+        setSyncStatus('本地数据已是最新');
+        schedulePush();
+      }
+      showPanel();
+    }).catch(function (err) {
+      setSyncStatus('拉取失败：' + err.message + '（已使用本地数据）');
+    });
+  }
+
+  /** 根据是否有数据切换面板并渲染 */
+  function showPanel() {
     if (state) {
       showGame(true);
       window.UI.render(state, window.Engine.summary(state));
     } else {
       showGame(false);
     }
-    bindEvents();
-    registerServiceWorker();
   }
 
   /** 绑定所有静态按钮事件 */
@@ -120,6 +151,58 @@
     window.UI.onFormSubmit = handleFormSubmit;
     window.UI.onItemAction = handleItemAction;
 
+    // 同步设置面板：打开时用已保存配置预填
+    $('#btn-sync').addEventListener('click', function () {
+      var cfg = window.GitHubSync.getConfig() || {};
+      $('#sync-owner').value = cfg.owner || 'picfik';
+      $('#sync-repo').value = cfg.repo || 'cashflow-pwa';
+      $('#sync-branch').value = cfg.branch || 'main';
+      $('#sync-path').value = cfg.path || 'data/state.json';
+      $('#sync-token').value = ''; // 出于安全不回显 token
+      $('#sync-panel').classList.toggle('hidden');
+    });
+
+    // 保存同步配置
+    $('#sync-form').addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var token = $('#sync-token').value.trim();
+      var old = window.GitHubSync.getConfig();
+      // 未填写新 token 时沿用旧值
+      if (!token && old) token = old.token;
+      if (!token) {
+        setSyncStatus('请填写 Access Token');
+        return;
+      }
+      window.GitHubSync.saveConfig({
+        owner: $('#sync-owner').value,
+        repo: $('#sync-repo').value,
+        branch: $('#sync-branch').value,
+        path: $('#sync-path').value,
+        token: token
+      });
+      setSyncStatus('同步已启用，正在验证…');
+      doPull();
+    });
+
+    // 手动推送 / 拉取 / 停用
+    $('#sync-push').addEventListener('click', doPush);
+    $('#sync-pull').addEventListener('click', doPull);
+    $('#sync-clear').addEventListener('click', function () {
+      if (!confirm('确定停用 GitHub 同步吗？（本机数据不受影响）')) return;
+      window.GitHubSync.clearConfig();
+      if (pushTimer) { clearTimeout(pushTimer); pushTimer = null; }
+      setSyncStatus('同步已停用');
+    });
+
+    // 页面切到后台时把未推送的修改立即提交
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'hidden' && pushTimer) {
+        clearTimeout(pushTimer);
+        pushTimer = null;
+        doPush();
+      }
+    });
+
     // 列表项的编辑/删除按钮（事件委托，绑定在各列表容器上）
     ['#income-list', '#expense-list', '#liability-list', '#asset-list', '#dream-list']
       .forEach(function (sel) {
@@ -135,6 +218,65 @@
           }
         });
       });
+  }
+
+  /* ---------------- GitHub 同步 ---------------- */
+
+  // 推送防抖定时器
+  var pushTimer = null;
+
+  /** 防抖推送：连续记账 2.5 秒后合并为一次 GitHub 提交 */
+  function schedulePush() {
+    if (!window.GitHubSync.isConfigured()) return;
+    if (pushTimer) clearTimeout(pushTimer);
+    pushTimer = setTimeout(function () {
+      pushTimer = null;
+      doPush();
+    }, 2500);
+  }
+
+  /** 立即推送当前数据到 GitHub */
+  function doPush() {
+    if (!state || !window.GitHubSync.isConfigured()) return;
+    setSyncStatus('正在推送到 GitHub…');
+    window.GitHubSync.pushState(state).then(function () {
+      setSyncStatus('已推送到 GitHub（' + new Date().toLocaleTimeString() + '）');
+    }).catch(function (err) {
+      setSyncStatus('推送失败：' + err.message);
+    });
+  }
+
+  /** 手动拉取：远端较新则覆盖本地 */
+  function doPull() {
+    if (!window.GitHubSync.isConfigured()) {
+      setSyncStatus('请先填写并保存同步配置');
+      return;
+    }
+    setSyncStatus('正在从 GitHub 拉取…');
+    window.GitHubSync.pullState().then(function (remote) {
+      if (!remote) {
+        setSyncStatus('GitHub 上还没有数据文件');
+        return;
+      }
+      var remoteAt = remote.state.updatedAt || '';
+      var localAt = (state && state.updatedAt) || '';
+      if (remoteAt >= localAt) {
+        state = remote.state;
+        window.AppStorage.saveState(state);
+        showPanel();
+        setSyncStatus('已拉取 GitHub 最新数据');
+      } else {
+        setSyncStatus('本地数据更新，未覆盖；需要时点"立即推送"上传');
+      }
+    }).catch(function (err) {
+      setSyncStatus('拉取失败：' + err.message);
+    });
+  }
+
+  /** 更新同步面板的状态文字 */
+  function setSyncStatus(text) {
+    var el = $('#sync-status');
+    if (el) el.textContent = text;
   }
 
   /* ---------------- 事件处理 ---------------- */

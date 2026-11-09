@@ -118,8 +118,19 @@ input:focus, select:focus {
 
 select option { background: var(--bg-2); color: var(--text-main); }
 
-.form-row { display: flex; gap: 10px; margin-top: 12px; }
+.form-row { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
 .form-row .btn { flex: 1; }
+
+/* 同步面板的双列字段 */
+.field-row { display: flex; gap: 10px; }
+.field-row .field { flex: 1; }
+
+code {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 0.85em;
+}
 
 /* ---------- 按钮 ---------- */
 .btn {

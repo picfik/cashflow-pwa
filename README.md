@@ -73,6 +73,28 @@ npx serve .
 - 若修改了文件名，需同步更新 `manifest.json` 的 `icons` 字段和 `service-worker.js` 的 `PRECACHE_ASSETS` 列表，并把 `CACHE_NAME` 版本号 +1（如 `cashflow-pwa-v2`）以触发缓存更新；
 - 建议使用带安全边距的方形图标（manifest 中已声明 `purpose: "any maskable"`）。
 
+## GitHub 数据同步（可选）
+
+除了 localStorage + 手动导出，应用还支持把账本自动保存为仓库中的 `data/state.json`：
+
+- **打开页面时**：自动从 GitHub 拉取远端数据，与本地比较 `updatedAt`，谁新用谁；
+- **数据变化时**：每次记账 2.5 秒后自动提交一次更新（切到后台会立即提交）；
+- 每次同步都会在仓库产生一条 commit，可在 GitHub 上看到完整历史，天然具备版本回溯能力。
+
+### 配置步骤
+
+1. 打开 GitHub → 右上角头像 → **Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token**；
+2. **Repository access** 选 "Only select repositories"，只勾选 `cashflow-pwa`；
+3. **Permissions → Repository permissions → Contents** 设为 **Read and write**，其余保持默认；
+4. 生成后复制 token（`github_pat_` 开头）；
+5. 在应用中点击顶部"同步设置"，填入用户名（`picfik`）、仓库名（`cashflow-pwa`）、分支（`main`）、文件路径（`data/state.json`）和 token，点击"保存并启用同步"。
+
+### 安全须知
+
+- Token 保存在本机浏览器的 localStorage 中，不会上传到任何第三方；
+- 请使用 **fine-grained token 并只授权这一个仓库**，泄露影响最小；怀疑泄露时立即到 GitHub 撤销；
+- 每次同步会产生 commit，频繁操作会让提交历史变长，介意的话可以定期在 GitHub 上整理或改用手动"导出 JSON"备份。
+
 ## 数据备份说明
 
 - **自动**：每次操作后数据自动写入浏览器 `localStorage`（key = `cashflow-state`）。
