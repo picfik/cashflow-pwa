@@ -83,16 +83,19 @@ npx serve .
 
 ### 配置步骤
 
-1. 打开 GitHub → 右上角头像 → **Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token**；
-2. **Repository access** 选 "Only select repositories"，只勾选 `cashflow-pwa`；
-3. **Permissions → Repository permissions → Contents** 设为 **Read and write**，其余保持默认；
-4. 生成后复制 token（`github_pat_` 开头）；
-5. 在应用中点击顶部"同步设置"，填入用户名（`picfik`）、仓库名（`cashflow-pwa`）、分支（`main`）、文件路径（`data/state.json`）和 token，点击"保存并启用同步"。
+1. 在应用中点击顶部"同步设置"，填入用户名、仓库名、分支与文件路径；
+2. **公开仓库**：不填 Token 即可保存，进入只读模式（可拉取，不可推送，未认证限额 60 次/小时/IP）；
+3. **需要自动推送**时，生成 Token：GitHub → 头像 → **Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token**；
+   - **Repository access** 选 "Only select repositories"，只勾选目标仓库；
+   - **Permissions → Repository permissions → Contents** 设为 **Read and write**，其余保持默认；
+4. 复制 token（`github_pat_` 开头）填入"Access Token"框，点击"保存并启用同步"。
 
 ### 安全须知
 
+- **仓库公开 = 账本数据公开**：`data/state.json` 与其提交历史所有人可见；
+  在意隐私可让应用部署在公开仓库、数据同步到另一个**私有仓库**（同步面板的仓库名可以与部署仓库不同）；
 - Token 保存在本机浏览器的 localStorage 中，不会上传到任何第三方；
-- 请使用 **fine-grained token 并只授权这一个仓库**，泄露影响最小；怀疑泄露时立即到 GitHub 撤销；
+- 请使用 **fine-grained token 并只授权数据所在仓库**，泄露影响最小；怀疑泄露时立即到 GitHub 撤销；
 - 每次同步会产生 commit，频繁操作会让提交历史变长，介意的话可以定期在 GitHub 上整理或改用手动"导出 JSON"备份。
 
 ## 数据备份说明

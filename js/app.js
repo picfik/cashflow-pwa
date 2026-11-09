@@ -162,17 +162,13 @@
       $('#sync-panel').classList.toggle('hidden');
     });
 
-    // 保存同步配置
+    // 保存同步配置（公开仓库可不填 token，仅推送受限）
     $('#sync-form').addEventListener('submit', function (ev) {
       ev.preventDefault();
       var token = $('#sync-token').value.trim();
       var old = window.GitHubSync.getConfig();
       // 未填写新 token 时沿用旧值
       if (!token && old) token = old.token;
-      if (!token) {
-        setSyncStatus('请填写 Access Token');
-        return;
-      }
       window.GitHubSync.saveConfig({
         owner: $('#sync-owner').value,
         repo: $('#sync-repo').value,
@@ -180,7 +176,11 @@
         path: $('#sync-path').value,
         token: token
       });
-      setSyncStatus('同步已启用，正在验证…');
+      if (!token) {
+        setSyncStatus('同步已启用（只读模式）：拉取可用，推送需补充 Token');
+      } else {
+        setSyncStatus('同步已启用，正在验证…');
+      }
       doPull();
     });
 

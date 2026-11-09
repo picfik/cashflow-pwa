@@ -50,9 +50,11 @@
       <h3>GitHub 数据同步</h3>
       <p class="hint">
         数据将保存为仓库中的 <code>data/state.json</code>：打开页面自动拉取最新数据，
-        每次记账后自动提交更新。需要填写你的
-        <strong>fine-grained Personal Access Token</strong>（只授权本仓库的 Contents 读写权限）。
-        Token 仅保存在本机浏览器中。
+        每次记账后自动提交更新。<strong>公开仓库拉取无需 Token</strong>；
+        推送（写入）必须填写
+        <strong>fine-grained Personal Access Token</strong>（只授权目标仓库的 Contents 读写权限）。
+        Token 仅保存在本机浏览器中。注意：仓库公开时账本数据所有人可见，
+        在意隐私可把数据同步到另一个私有仓库。
       </p>
       <form id="sync-form" autocomplete="off">
         <div class="field-row">

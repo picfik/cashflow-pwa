@@ -12,15 +12,16 @@
   var CONFIG_KEY = 'cashflow-sync-config'; // 同步配置在 localStorage 的 key
   var API_BASE = 'https://api.github.com';
 
-  /** 读取配置：{ owner, repo, branch, path, token } */
+  /** 读取配置：{ owner, repo, branch, path, token }（公开仓库拉取时 token 可选） */
   function getConfig() {
     try {
       var raw = localStorage.getItem(CONFIG_KEY);
       if (!raw) return null;
       var cfg = JSON.parse(raw);
-      if (!cfg.owner || !cfg.repo || !cfg.token) return null;
+      if (!cfg.owner || !cfg.repo) return null;
       cfg.branch = cfg.branch || 'main';
       cfg.path = cfg.path || 'data/state.json';
+      cfg.token = cfg.token || '';
       return cfg;
     } catch (e) {
       return null;
@@ -48,13 +49,23 @@
     return getConfig() !== null;
   }
 
-  /** 构造带认证头的请求参数 */
+  /** 是否填写了 Token（推送写操作必须认证） */
+  function hasToken() {
+    var cfg = getConfig();
+    return !!(cfg && cfg.token);
+  }
+
+  /** 构造请求头：有 token 时附带认证（公开仓库的读取无需认证） */
   function headers() {
-    return {
-      'Authorization': 'Bearer ' + getConfig().token,
+    var h = {
       'Accept': 'application/vnd.github+json',
       'Content-Type': 'application/json'
     };
+    var cfg = getConfig();
+    if (cfg && cfg.token) {
+      h['Authorization'] = 'Bearer ' + cfg.token;
+    }
+    return h;
   }
 
   /** 内容文件的 API 地址 */
@@ -116,6 +127,10 @@
    * @returns {Promise<object>} GitHub API 的提交结果
    */
   function pushState(state) {
+    // 写操作必须认证：未填 token 时给出明确提示
+    if (!hasToken()) {
+      return Promise.reject(new Error('推送需要 Token（公开仓库读取可免，写入必须认证）'));
+    }
     // 提交前更新时间戳，保证"谁新用谁"的比较可靠
     var payload = JSON.parse(JSON.stringify(state));
     payload.updatedAt = new Date().toISOString();
