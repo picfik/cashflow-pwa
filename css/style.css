@@ -1,0 +1,298 @@
+/* ============================================================
+ * style.css —— 全部样式
+ * 深色渐变背景 + 毛玻璃卡片，适配移动端与 iOS 安全区域
+ * ============================================================ */
+
+:root {
+  --bg-1: #0f2027;
+  --bg-2: #203a43;
+  --bg-3: #2c5364;
+  --primary: #ffb703;   /* 主色：黄 */
+  --success: #2ecc71;   /* 成功：绿 */
+  --danger: #e74c3c;    /* 危险：红 */
+  --glass: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.15);
+  --text-main: #f4f6f7;
+  --text-sub: rgba(244, 246, 247, 0.65);
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; }
+
+body {
+  font-family: 'PingFang SC', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  color: var(--text-main);
+  background: linear-gradient(160deg, var(--bg-1) 0%, var(--bg-2) 50%, var(--bg-3) 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  /* 适配 iOS 安全区域（刘海屏 / Home 指示条） */
+  padding:
+    calc(env(safe-area-inset-top) + 0px)
+    calc(env(safe-area-inset-right) + 12px)
+    calc(env(safe-area-inset-bottom) + 24px)
+    calc(env(safe-area-inset-left) + 12px);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---------- 顶部标题栏 ---------- */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 14px 4px;
+}
+
+.title { font-size: 1.3rem; font-weight: 700; letter-spacing: 0.5px; }
+.subtitle { font-size: 0.85rem; font-weight: 400; color: var(--text-sub); }
+.toolbar { display: flex; gap: 8px; }
+
+/* ---------- 容器与布局 ---------- */
+.container {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.columns { display: flex; gap: 16px; align-items: flex-start; }
+
+.report { flex: 1.2; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.actions { flex: 1; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+/* ---------- 毛玻璃卡片 ---------- */
+.card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 16px;
+}
+
+.section h3 {
+  font-size: 1rem;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--glass-border);
+  color: var(--primary);
+}
+
+.hint { color: var(--text-sub); font-size: 0.85rem; margin: 8px 0 14px; line-height: 1.6; }
+
+/* ---------- 表单 ---------- */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+  font-size: 0.85rem;
+  color: var(--text-sub);
+}
+
+input, select {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  color: var(--text-main);
+  font-size: 1rem;
+  font-family: inherit;
+  padding: 10px 12px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+input:focus, select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(255, 183, 3, 0.25);
+}
+
+select option { background: var(--bg-2); color: var(--text-main); }
+
+.form-row { display: flex; gap: 10px; margin-top: 12px; }
+.form-row .btn { flex: 1; }
+
+/* ---------- 按钮 ---------- */
+.btn {
+  font-family: inherit;
+  font-size: 0.95rem;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: transform 0.1s, opacity 0.2s, background 0.2s;
+  color: var(--text-main);
+}
+
+.btn:active { transform: scale(0.97); }
+
+.btn-primary { background: var(--primary); color: #1a1a1a; font-weight: 700; }
+.btn-primary:hover { opacity: 0.9; }
+
+.btn-ghost { background: transparent; border: 1px solid var(--glass-border); color: var(--text-main); }
+.btn-ghost:hover { background: rgba(255, 255, 255, 0.1); }
+
+.btn-danger-ghost { background: transparent; border: 1px solid rgba(231, 76, 60, 0.6); color: var(--danger); }
+.btn-danger-ghost:hover { background: rgba(231, 76, 60, 0.15); }
+
+.btn-sm { font-size: 0.8rem; padding: 6px 12px; }
+.btn-block { width: 100%; margin-top: 4px; }
+
+/* ---------- 指标条 ---------- */
+.metrics { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+
+.metric {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.metric-label { font-size: 0.75rem; color: var(--text-sub); }
+.metric-value { font-size: 1.05rem; font-weight: 700; word-break: break-all; }
+.metric-value.pos { color: var(--success); }
+.metric-value.neg { color: var(--danger); }
+
+/* ---------- 财务自由进度条 ---------- */
+.freedom-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: var(--text-sub);
+  margin-bottom: 8px;
+}
+
+#freedom-text { color: var(--primary); font-weight: 700; }
+
+.bar-track {
+  height: 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: var(--primary);
+  transition: width 0.4s ease, background 0.4s ease;
+}
+
+.bar-fill.free { background: var(--success); }
+
+.freedom-status { margin-top: 8px; color: var(--success); font-weight: 700; text-align: center; }
+
+/* ---------- 列表项 ---------- */
+.item-list { display: flex; flex-direction: column; gap: 8px; }
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+}
+
+.item-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.item-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.item-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item-sub { color: var(--text-sub); font-size: 0.78rem; }
+.item-amount { font-weight: 700; white-space: nowrap; }
+.amount-pos { color: var(--success); }
+.amount-neg { color: var(--danger); }
+.amount-neutral { color: var(--text-main); }
+
+.item-btns { display: flex; gap: 6px; flex-shrink: 0; }
+
+.icon-btn {
+  background: transparent;
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  color: var(--text-sub);
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.icon-btn:hover { color: var(--text-main); }
+.icon-btn.del:hover { color: var(--danger); border-color: var(--danger); }
+
+.empty-tip { color: var(--text-sub); font-size: 0.82rem; padding: 4px 0; }
+
+/* 梦想进度条 */
+.dream-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.dream-bar-fill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 999px;
+  transition: width 0.3s ease, background 0.3s ease;
+}
+
+.dream-bar-fill.done { background: var(--success); }
+.dream-done { color: var(--success); font-weight: 700; }
+
+/* ---------- 操作按钮区 ---------- */
+.action-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.action-grid .btn { font-size: 0.85rem; padding: 10px 8px; }
+
+/* ---------- 操作日志 ---------- */
+.log-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.log-item {
+  display: flex;
+  gap: 10px;
+  font-size: 0.8rem;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+}
+
+.log-time { color: var(--text-sub); white-space: nowrap; flex-shrink: 0; }
+.log-text { word-break: break-all; }
+
+/* ---------- 隐藏 ---------- */
+.hidden { display: none !important; }
+
+/* ---------- 响应式 ---------- */
+@media (max-width: 768px) {
+  /* 手机竖屏：所有栏目上下堆叠 */
+  .columns { flex-direction: column; }
+  .report, .actions { width: 100%; }
+  .metrics { grid-template-columns: repeat(2, 1fr); }
+  /* 让"净资产"占满整行 */
+  .metric:last-child { grid-column: 1 / -1; }
+  .topbar { justify-content: center; text-align: center; }
+}

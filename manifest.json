@@ -1,0 +1,25 @@
+{
+  "name": "现金流沙盘（手动版）",
+  "short_name": "现金流沙盘",
+  "description": "手动记账式现金流沙盘：计算、记账、判断财务自由，全离线可用",
+  "lang": "zh-CN",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0f2027",
+  "theme_color": "#203a43",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
