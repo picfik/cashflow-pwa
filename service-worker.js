@@ -5,7 +5,7 @@
  * ============================================================ */
 
 // 缓存名称：版本号变化后会触发旧缓存清理
-var CACHE_NAME = 'cashflow-pwa-v2';
+var CACHE_NAME = 'cashflow-pwa-v3';
 
 // 需要预缓存的静态资源列表（全部为相对路径）
 var PRECACHE_ASSETS = [
